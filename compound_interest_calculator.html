@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compound Interest Calculator</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --card-bg: #f8fafc;
+    --text: #1e293b;
+    --text-muted: #475569;
+    --border: #cbd5e1;
+    --accent: #1d4ed8;
+    --accent-soft: #dbeafe;
+    --result-bg: #ecfdf5;
+    --result-border: #10b981;
+    --result-text: #065f46;
+    --grid-line: #e2e8f0;
+    --focus-ring: #1d4ed8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f1f5f9;
+      --text-muted: #cbd5e1;
+      --border: #334155;
+      --accent: #60a5fa;
+      --accent-soft: #1e3a5f;
+      --result-bg: #052e21;
+      --result-border: #34d399;
+      --result-text: #6ee7b7;
+      --grid-line: #334155;
+      --focus-ring: #93c5fd;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text: #f1f5f9;
+    --text-muted: #cbd5e1;
+    --border: #334155;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a5f;
+    --result-bg: #052e21;
+    --result-border: #34d399;
+    --result-text: #6ee7b7;
+    --grid-line: #334155;
+    --focus-ring: #93c5fd;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 20px;
+    line-height: 1.5;
+  }
+
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin: 0 0 4px 0;
+    color: var(--text);
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(240px, 340px) 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 680px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  input[type="number"],
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  input[type="number"]:focus,
+  select:focus {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 1px;
+  }
+
+  .result-box {
+    background: var(--result-bg);
+    border: 1px solid var(--result-border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .result-label {
+    font-size: 0.92rem;
+    color: var(--result-text);
+  }
+
+  .result-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--result-text);
+  }
+
+  .explanation {
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--accent-soft);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+  }
+
+  .chart-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+  }
+
+  .axis-label {
+    font-size: 10px;
+    fill: var(--text-muted);
+  }
+
+  .grid-line {
+    stroke: var(--grid-line);
+    stroke-width: 1;
+  }
+
+  .balance-line {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.5;
+  }
+
+  .balance-area {
+    fill: var(--accent);
+    opacity: 0.12;
+  }
+
+  .principal-line {
+    fill: none;
+    stroke: var(--text-muted);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+  }
+
+  .dot {
+    fill: var(--accent);
+  }
+
+  .legend {
+    display: flex;
+    gap: 18px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .swatch {
+    width: 14px;
+    height: 3px;
+    display: inline-block;
+    border-radius: 2px;
+  }
+
+  .formula-box {
+    font-family: "Courier New", monospace;
+    background: var(--card-bg);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 18px;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📈 Compound Interest Calculator</h1>
+    <p class="subtitle">FIN 420 · Awesome Investing — see how your money grows over time</p>
+  </header>
+
+  <div class="layout">
+    <!-- Inputs -->
+    <div class="card">
+      <div class="field">
+        <label for="principal">Starting amount ($)</label>
+        <input type="number" id="principal" value="1000" min="0" step="50" inputmode="decimal">
+        <div class="hint">The amount you invest today (also called the "principal").</div>
+      </div>
+
+      <div class="field">
+        <label for="rate">Annual interest rate (%)</label>
+        <input type="number" id="rate" value="5" min="0" max="100" step="0.1" inputmode="decimal">
+        <div class="hint">The yearly rate your investment earns, before compounding.</div>
+      </div>
+
+      <div class="field">
+        <label for="years">Number of years</label>
+        <input type="number" id="years" value="10" min="1" max="60" step="1" inputmode="numeric">
+        <div class="hint">How long the money stays invested.</div>
+      </div>
+
+      <div class="field">
+        <label for="frequency">Compounding frequency</label>
+        <select id="frequency">
+          <option value="1">Annually (1x per year)</option>
+          <option value="12" selected>Monthly (12x per year)</option>
+          <option value="365">Daily (365x per year)</option>
+        </select>
+        <div class="hint">How often interest is calculated and added to your balance.</div>
+      </div>
+
+      <div class="formula-box">
+        A = P × (1 + r/n)<sup>n×t</sup><br>
+        P = starting amount, r = rate (decimal), n = times compounded per year, t = years
+      </div>
+    </div>
+
+    <!-- Results + Chart -->
+    <div class="card">
+      <div class="result-box" role="status" aria-live="polite">
+        <div class="result-row">
+          <span class="result-label">Ending balance</span>
+          <span class="result-value" id="endingBalance">$0.00</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Total interest earned</span>
+          <span class="result-value" id="interestEarned">$0.00</span>
+        </div>
+      </div>
+
+      <p class="explanation" id="explanation" aria-live="polite">
+        Enter your numbers to see the explanation.
+      </p>
+
+      <div class="chart-title">Balance growth by year</div>
+      <svg id="chart" viewBox="0 0 640 300" role="img" aria-labelledby="chartDesc">
+        <desc id="chartDesc">Line chart showing account balance for each year, compared to the original principal.</desc>
+      </svg>
+      <div class="legend">
+        <span class="legend-item"><span class="swatch" style="background:var(--accent);"></span> Balance (with compounding)</span>
+        <span class="legend-item"><span class="swatch" style="background:var(--text-muted); border-bottom:2px dashed var(--text-muted); height:0;"></span> Starting amount</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const fmtMoney = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const freqLabel = { "1": "annually", "12": "monthly", "365": "daily" };
+
+  function computeSeries(P, ratePct, years, n) {
+    const r = ratePct / 100;
+    const points = [];
+    for (let t = 0; t <= years; t++) {
+      const balance = P * Math.pow(1 + r / n, n * t);
+      points.push({ year: t, balance });
+    }
+    return points;
+  }
+
+  function drawChart(points, principal) {
+    const svg = $("chart");
+    // clear previous content except desc
+    const desc = svg.querySelector("desc");
+    svg.innerHTML = "";
+    svg.appendChild(desc);
+
+    const W = 640, H = 300;
+    const marginLeft = 60, marginRight = 20, marginTop = 15, marginBottom = 35;
+    const plotW = W - marginLeft - marginRight;
+    const plotH = H - marginTop - marginBottom;
+
+    const maxBalance = Math.max(...points.map(p => p.balance));
+    const maxYear = points[points.length - 1].year;
+
+    const xScale = (year) => marginLeft + (year / (maxYear || 1)) * plotW;
+    const yScale = (val) => marginTop + plotH - (val / (maxBalance || 1)) * plotH;
+
+    const ns = "http://www.w3.org/2000/svg";
+    const makeEl = (tag, attrs) => {
+      const el = document.createElementNS(ns, tag);
+      for (const k in attrs) el.setAttribute(k, attrs[k]);
+      return el;
+    };
+
+    // gridlines + y-axis labels (5 steps)
+    const steps = 5;
+    for (let i = 0; i <= steps; i++) {
+      const val = (maxBalance / steps) * i;
+      const y = yScale(val);
+      svg.appendChild(makeEl("line", {
+        x1: marginLeft, x2: W - marginRight, y1: y, y2: y, class: "grid-line"
+      }));
+      const label = makeEl("text", {
+        x: marginLeft - 8, y: y + 4, "text-anchor": "end", class: "axis-label"
+      });
+      label.textContent = "$" + Math.round(val).toLocaleString("en-US");
+      svg.appendChild(label);
+    }
+
+    // x-axis labels (show at most ~8 ticks)
+    const tickEvery = Math.max(1, Math.ceil(maxYear / 8));
+    for (let yr = 0; yr <= maxYear; yr += tickEvery) {
+      const x = xScale(yr);
+      const label = makeEl("text", {
+        x: x, y: H - marginBottom + 18, "text-anchor": "middle", class: "axis-label"
+      });
+      label.textContent = "Yr " + yr;
+      svg.appendChild(label);
+    }
+
+    // principal reference line
+    const pY = yScale(principal);
+    svg.appendChild(makeEl("line", {
+      x1: marginLeft, x2: W - marginRight, y1: pY, y2: pY, class: "principal-line"
+    }));
+
+    // area under balance curve
+    let areaPath = `M ${xScale(0)} ${yScale(points[0].balance)} `;
+    points.forEach(p => { areaPath += `L ${xScale(p.year)} ${yScale(p.balance)} `; });
+    areaPath += `L ${xScale(maxYear)} ${yScale(0)} L ${xScale(0)} ${yScale(0)} Z`;
+    svg.appendChild(makeEl("path", { d: areaPath, class: "balance-area" }));
+
+    // balance line
+    let linePath = `M ${xScale(points[0].year)} ${yScale(points[0].balance)} `;
+    points.forEach(p => { linePath += `L ${xScale(p.year)} ${yScale(p.balance)} `; });
+    svg.appendChild(makeEl("path", { d: linePath, class: "balance-line" }));
+
+    // dots (skip if too many years, sample every tickEvery)
+    points.forEach(p => {
+      if (p.year % tickEvery === 0 || p.year === maxYear) {
+        svg.appendChild(makeEl("circle", {
+          cx: xScale(p.year), cy: yScale(p.balance), r: 3, class: "dot"
+        }));
+      }
+    });
+
+    // axis lines
+    svg.appendChild(makeEl("line", {
+      x1: marginLeft, x2: marginLeft, y1: marginTop, y2: H - marginBottom, class: "grid-line"
+    }));
+    svg.appendChild(makeEl("line", {
+      x1: marginLeft, x2: W - marginRight, y1: H - marginBottom, y2: H - marginBottom, class: "grid-line"
+    }));
+  }
+
+  function update() {
+    const P = parseFloat($("principal").value) || 0;
+    const ratePct = parseFloat($("rate").value) || 0;
+    const years = Math.max(1, parseInt($("years").value) || 1);
+    const n = parseInt($("frequency").value);
+
+    const points = computeSeries(P, ratePct, years, n);
+    const ending = points[points.length - 1].balance;
+    const interest = ending - P;
+
+    $("endingBalance").textContent = fmtMoney(ending);
+    $("interestEarned").textContent = fmtMoney(interest);
+
+    $("explanation").textContent =
+      `Because interest compounds ${freqLabel[String(n)]}, your ${fmtMoney(P)} grows to ${fmtMoney(ending)} ` +
+      `over ${years} year${years === 1 ? "" : "s"} — that's ${fmtMoney(interest)} earned not just on your ` +
+      `original amount, but on interest you'd already earned along the way.`;
+
+    drawChart(points, P);
+  }
+
+  ["principal", "rate", "years", "frequency"].forEach(id => {
+    $(id).addEventListener("input", update);
+    $(id).addEventListener("change", update);
+  });
+
+  update();
+</script>
+</body>
+</html>
